@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlmodel import SQLModel, Session
 
 # import models here so sqlmodel discovers table definitions
-from database.models import Shipment, User  # noqa: F401
+from database.models import Shipment, User, RevokedToken  # noqa: F401
 
 load_dotenv()
 

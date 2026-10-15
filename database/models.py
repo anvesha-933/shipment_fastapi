@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from sqlmodel import Field, SQLModel
 
@@ -30,3 +30,12 @@ class User(SQLModel, table=True):
     username: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
     password_hash: str
+
+
+# stores revoked tokens when user logs out
+class RevokedToken(SQLModel, table=True):
+    __tablename__ = "revoked_tokens"
+
+    id: int | None = Field(default=None, primary_key=True)
+    token: str = Field(unique=True, index=True)
+    revoked_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

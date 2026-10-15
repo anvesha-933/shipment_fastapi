@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from sqlmodel import Session
+from sqlmodel import Session, select
 
-from database.models import User
+from database.models import User, RevokedToken
 from database.sessions import get_session
 
 # load values from .env file
@@ -53,12 +53,35 @@ def verify_token(token: str) -> int:
         )
 
 
+# checks if a token has been logged out/revoked
+def is_token_revoked(token: str, session: Session) -> bool:
+    revoked = session.exec(
+        select(RevokedToken).where(RevokedToken.token == token)
+    ).first()
+    return revoked is not None
+
+
+# marks a token as revoked in the database
+def revoke_token(token: str, session: Session):
+    if not is_token_revoked(token, session):
+        session.add(RevokedToken(token=token))
+        session.commit()
+
+
 # dependency to protect routes: gets the user associated with the bearer token
 def get_user(
     credentials: HTTPAuthorizationCredentials = Depends(oauth_scheme),
     session: Session = Depends(get_session),
 ) -> User:
     token = credentials.credentials
+
+    # check if user has already logged out
+    if is_token_revoked(token, session):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked, please log in again",
+        )
+
     user_id = verify_token(token)
     user = session.get(User, user_id)
 

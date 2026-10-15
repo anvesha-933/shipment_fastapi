@@ -267,7 +267,17 @@ Open `http://127.0.0.1:8000/docs` in your browser. This gives you an interactive
 
 ---
 
-### Step 4: Manage Shipments (CRUD)
+### Step 4: Test Logout & Token Invalidation
+- While authorized, expand **`POST /logout`**.
+- Click **Try it out**, then click **Execute**.
+- You will receive `{"message": "Logged out successfully"}`.
+- Now try executing **`GET /users/me`** again with that same token:
+  - You will receive `401 Unauthorized` with detail: `"Token has been revoked, please log in again"`.
+  - This demonstrates how stateless JWT tokens can be securely invalidated before their expiration using a database revocation list!
+
+---
+
+### Step 5: Manage Shipments (CRUD)
 - **Create a shipment:**
   - Endpoint: `POST /new-shipment`
   - Sample Body:

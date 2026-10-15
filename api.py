@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlmodel import Session, select, or_
 
-from auth import create_access_token, get_user
+from auth import create_access_token, get_user, oauth_scheme, revoke_token, verify_token
 from database.models import Shipment, User
 from database.sessions import create_db_and_table, get_session
 from hash import check_password, generate_password
@@ -81,6 +82,18 @@ def login_user(data: LoginUser, session: Session = Depends(get_session)):
 @app.get("/users/me", response_model=UserResponse)
 def get_my_profile(current_user: User = Depends(get_user)):
     return current_user
+
+
+# invalidates the current bearer token so it cannot be used again
+@app.post("/logout")
+def logout_user(
+    credentials: HTTPAuthorizationCredentials = Depends(oauth_scheme),
+    session: Session = Depends(get_session),
+):
+    token = credentials.credentials
+    verify_token(token)
+    revoke_token(token, session)
+    return {"message": "Logged out successfully"}
 
 
 @app.post("/new-shipment", response_model=Shipment, status_code=status.HTTP_201_CREATED)
