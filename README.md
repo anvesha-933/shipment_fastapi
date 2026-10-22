@@ -1,6 +1,6 @@
 # FastAPI Shipment & Authentication Training Project
 
-This project is designed as a hands-on learning lab to take you from a complete beginner in Python backend development to building a production-ready REST API with authentication and database integration.
+This project is designed as a hands-on learning lab for Python backend development, REST APIs, MVC-style separation, authentication, and database integration.
 
 ---
 
@@ -11,7 +11,7 @@ This repository is split into three progressive learning stages:
 1. **Stage 1: FastAPI Fundamentals (`main.py`)**
    - Understanding HTTP methods (`GET`, `POST`, `PUT`, `DELETE`).
    - Working with path parameters, query parameters, and request bodies.
-   - In-memory data management and returning proper HTTP status codes.
+   - Separating FastAPI controllers from in-memory shipment services.
    - Validating incoming requests with Pydantic schemas.
 
 2. **Stage 2: Database Basics (`database.py` & `db.py`)**
@@ -23,6 +23,7 @@ This repository is split into three progressive learning stages:
 3. **Stage 3: Full Application with ORM & JWT Auth (`api.py`)**
    - Modern ORM modeling using **SQLModel** (built on SQLAlchemy + Pydantic).
    - Database session lifecycle and FastAPI dependency injection (`Depends`).
+   - Separating controllers, business services, and database repositories.
    - Secure password hashing using **Bcrypt** with salt generation.
    - Stateless authentication using **JSON Web Tokens (JWT)**.
    - Protecting private routes with Bearer token authorization.
@@ -31,20 +32,30 @@ This repository is split into three progressive learning stages:
 
 ## Project Structure
 
-Here is how the project files fit together:
+The API uses an MVC-inspired layout. SQLModel classes in `database/models.py` are the data models; FastAPI controllers handle HTTP requests and responses; services contain application rules; and repositories own database queries and persistence. Since this is a JSON API, the Pydantic schemas in `schemas.py` shape request and response data instead of server-rendered views.
 
 ```text
-├── main.py              # Stage 1: In-memory FastAPI starter code
-├── database.py          # Stage 2: Standalone raw SQLite demonstration
-├── db.py                # Stage 2: Database helper class for shipments
-├── db_explained.md      # Detailed breakdown of database queries
-├── api.py               # Stage 3: Full REST API with auth & shipments
-├── auth.py              # JWT generation, token decoding, and auth dependency
-├── hash.py              # Password hashing and verification using bcrypt
-├── schemas.py           # Pydantic request & response validation models
+├── main.py                    # Stage 1 app entry point
+├── api.py                     # Stage 3 app entry point and router assembly
+├── controllers/
+│   ├── fundamentals.py        # Stage 1 HTTP endpoints
+│   ├── shipments.py           # Shipment HTTP endpoints
+│   ├── users.py               # Registration, login, and logout endpoints
+│   └── dependencies.py        # Authenticated-user dependency
+├── services/
+│   ├── fundamentals.py        # Stage 1 in-memory shipment operations
+│   ├── shipments.py           # Shipment business operations
+│   └── users.py               # User and authentication business operations
+├── repositories/              # Database queries and persistence
+├── auth.py                    # JWT creation and validation
+├── hash.py                    # Password hashing and verification
+├── schemas.py                 # Pydantic request & response models
 ├── database/
-│   ├── models.py        # SQLModel table definitions (User, Shipment)
-│   └── sessions.py      # Database engine & session generator (SQLite / PostgreSQL)
+│   ├── models.py              # SQLModel table definitions
+│   └── sessions.py            # Database engine and session dependency
+├── database.py                # Stage 2 standalone raw SQLite demonstration
+├── db.py                      # Stage 2 database helper exercise
+├── db_explained.md            # Detailed breakdown of database queries
 ├── .env.example         # Example environment variables template
 ├── requirements.txt     # Python package dependencies (for pip)
 ├── pyproject.toml       # Project metadata (for pip or uv)
